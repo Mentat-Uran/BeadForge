@@ -1,12 +1,3 @@
-#!/bin/bash
-
-LOG_DIR="/workspace/automation_log"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-REPORT_FILE="$LOG_DIR/report_$TIMESTAMP.html"
-
-mkdir -p "$(dirname "$REPORT_FILE")"
-
-cat > "$REPORT_FILE" << 'EOF'
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -104,23 +95,23 @@ cat > "$REPORT_FILE" << 'EOF'
     <div class="container">
         <div class="card">
             <h1>🎨 BeadForge AI 迭代报告</h1>
-            <p class="subtitle">Generated: TIMESTAMP_PLACEHOLDER</p>
+            <p class="subtitle">Generated: 2026-05-02 13:04:28</p>
             
             <div class="stats">
                 <div class="stat-box">
-                    <div class="stat-value">ITERATION_COUNT</div>
+                    <div class="stat-value">0</div>
                     <div class="stat-label">总迭代次数</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">SUCCESS_COUNT</div>
+                    <div class="stat-value">0</div>
                     <div class="stat-label">成功改进</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">ROLLBACK_COUNT</div>
+                    <div class="stat-value">0</div>
                     <div class="stat-label">回滚次数</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-value">UPTIME</div>
+                    <div class="stat-value">运行中</div>
                     <div class="stat-label">系统运行时间</div>
                 </div>
             </div>
@@ -131,10 +122,10 @@ cat > "$REPORT_FILE" << 'EOF'
             <ul class="log-list">
                 <li>
                     <div>
-                        <strong>迭代 #LATEST_ITERATION</strong>
-                        <div class="log-time">LATEST_TIME</div>
+                        <strong>迭代 #0</strong>
+                        <div class="log-time">系统初始化</div>
                     </div>
-                    <span class="log-status status-STATUS">STATUS_TEXT</span>
+                    <span class="log-status status-pending">等待首次迭代</span>
                 </li>
             </ul>
         </div>
@@ -142,16 +133,18 @@ cat > "$REPORT_FILE" << 'EOF'
         <div class="card">
             <h2 class="section-title">📁 最近日志</h2>
             <ul class="log-list">
-EOF
-
-find "$LOG_DIR" -type f -name "*.log" -mtime -1 | head -5 | while read logfile; do
-    echo "                <li>" >> "$REPORT_FILE"
-    echo "                    <div><strong>$(basename "$logfile")</strong></div>" >> "$REPORT_FILE"
-    echo "                    <span class=\"log-time\">$(stat -c %y "$logfile" | cut -d' ' -f1,2 | cut -d'.' -f1)</span>" >> "$REPORT_FILE"
-    echo "                </li>" >> "$REPORT_FILE"
-done
-
-cat >> "$REPORT_FILE" << 'EOF'
+                <li>
+                    <div><strong>iteration_20260502_010318.log</strong></div>
+                    <span class="log-time">2026-05-02 13:00:09</span>
+                </li>
+                <li>
+                    <div><strong>iteration_20260502_010250.log</strong></div>
+                    <span class="log-time">2026-05-02 13:00:09</span>
+                </li>
+                <li>
+                    <div><strong>iteration_20260501_230043.log</strong></div>
+                    <span class="log-time">2026-05-02 13:00:09</span>
+                </li>
             </ul>
         </div>
         
@@ -184,18 +177,3 @@ cat >> "$REPORT_FILE" << 'EOF'
     </div>
 </body>
 </html>
-EOF
-
-sed -i "s/TIMESTAMP_PLACEHOLDER/$(date '+%Y-%m-%d %H:%M:%S')/" "$REPORT_FILE"
-sed -i "s/ITERATION_COUNT/0/" "$REPORT_FILE"
-sed -i "s/SUCCESS_COUNT/0/" "$REPORT_FILE"
-sed -i "s/ROLLBACK_COUNT/0/" "$REPORT_FILE"
-sed -i "s/UPTIME/运行中/" "$REPORT_FILE"
-sed -i "s/LATEST_ITERATION/0/" "$REPORT_FILE"
-sed -i "s/LATEST_TIME/系统初始化/" "$REPORT_FILE"
-sed -i "s/STATUS_TEXT/等待首次迭代/" "$REPORT_FILE"
-sed -i "s/STATUS/pending/" "$REPORT_FILE"
-
-echo ""
-echo "报告生成完成"
-echo "HTML报告: $REPORT_FILE"
