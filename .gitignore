@@ -1,0 +1,8 @@
+.trae/
+.vscode/
+*.log
+*.tmp
+*.bak
+dist/
+output/
+node_modules/
