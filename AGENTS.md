@@ -16,7 +16,3 @@ BeadForge is a dependency-free, single-file browser application.
 - Open `BeadForge.html` in a current browser.
 - Exercise a new canvas, drawing, undo, import, export, image conversion, and print flow when those areas change.
 - Check that the example JSON fixtures still import or fail as documented.
-
-## GitHub Actions
-
-This public repository intentionally contains no GitHub Actions workflows. Use local browser checks only.

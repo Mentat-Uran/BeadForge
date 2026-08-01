@@ -36,8 +36,6 @@ BeadForge-Post.md    # Project background and product notes
 
 Designs are processed in the browser. Do not commit private artwork, personal files, credentials, or generated exports. Keep changes dependency-free where possible and test the editor in at least one current Chromium- or Firefox-based browser.
 
-This repository intentionally contains no GitHub Actions workflows. Validation is local and manual.
-
 ## License
 
 The project is released under the [MIT License](LICENSE).
