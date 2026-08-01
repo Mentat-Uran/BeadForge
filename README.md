@@ -36,6 +36,12 @@ BeadForge-Post.md    # Project background and product notes
 
 Designs are processed in the browser. Do not commit private artwork, personal files, credentials, or generated exports. Keep changes dependency-free where possible and test the editor in at least one current Chromium- or Firefox-based browser.
 
+## Community and security
+
+- Read [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) before participating.
+- Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+- Report security issues privately according to [`SECURITY.md`](SECURITY.md).
+
 ## License
 
 The project is released under the [MIT License](LICENSE).
