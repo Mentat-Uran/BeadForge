@@ -1,0 +1,38 @@
+name: Brief CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  brief:
+    name: brief
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check embedded JavaScript syntax
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const html = fs.readFileSync('BeadForge.html', 'utf8');
+          const blocks = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/gi)]
+            .map((match) => match[1].trim())
+            .filter(Boolean);
+          if (blocks.length !== 1) {
+            throw new Error(`Expected one non-empty script block, got ${blocks.length}`);
+          }
+          new Function(blocks[0]);
+          NODE

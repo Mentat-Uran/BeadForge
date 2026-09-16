@@ -207,7 +207,7 @@
             font-weight: 600;
         }
 
-        .tool-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; grid-gap: 8px; }
+        .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; grid-gap: 8px; }
         .tool-btn {
             display: flex; flex-direction: column; align-items: center; gap: 8px;
             padding: 12px 4px; border: 1px solid var(--glass-border-light); border-radius: var(--radius);
@@ -288,8 +288,6 @@
             background-position: 0 0, 10px 10px;
         }
         .canvas-area.panning { cursor: grabbing; }
-        .canvas-area.pan-tool { cursor: grab; }
-        .canvas-area.pan-tool.panning { cursor: grabbing; }
         .canvas-area.drawing { cursor: crosshair; }
         .canvas-area canvas { position: absolute; top: 0; left: 0; }
         #mainCanvas { image-rendering: pixelated; }
@@ -592,7 +590,7 @@
         </div>
         <div class="header-actions">
             <button class="btn btn-secondary" id="undoBtn" title="撤销 Ctrl+Z"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg><span class="btn-label">撤销</span></button>
-            <button class="btn btn-secondary" id="saveBtn" title="保存到小红书本地 Ctrl+S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span class="btn-label">保存</span></button>
+            <button class="btn btn-secondary" id="saveBtn" title="保存到本地 Ctrl+S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span class="btn-label">保存</span></button>
             <button class="btn btn-secondary" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="btn-label">导入</span></button>
             <button class="btn btn-secondary" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span class="btn-label">导出</span></button>
             <button class="btn btn-icon" id="themeToggleBtn" title="切换主题" style="position: relative; overflow: hidden;">
@@ -616,7 +614,6 @@
                     <button class="tool-btn" id="toolErase" title="橡皮 E"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"/><line x1="17" y1="17" x2="11" y2="11"/></svg><span>橡皮</span></button>
                     <button class="tool-btn" id="toolFill" title="填充 F"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11l-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11z"/></svg><span>填充</span></button>
                     <button class="tool-btn" id="toolPicker" title="取色 I"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 7.8l-2.4-2.4c-.8-.8-2-.8-2.8 0L3 17.4V21h3.6L20.2 10.6c.8-.8.8-2 0-2.8z"/><line x1="15" y1="6" x2="18" y2="9"/></svg><span>取色</span></button>
-                    <button class="tool-btn" id="toolPan" title="拖动画布 H" aria-label="拖动画布"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><path d="m8 7 4-4 4 4M8 17l4 4 4-4M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg><span>拖动</span></button>
                 </div>
             </div>
             <div class="panel-section">
@@ -1341,68 +1338,10 @@
         static load(k){try{const v=localStorage.getItem('pc_'+k);return v?this._deobf(v):'';}catch(e){return'';}}
     }
 
-    const PROJECT_STORAGE_KEY='beadforge_project_v1';
-    const LEGACY_PROJECT_STORAGE_KEY='perlercraft_autosave';
-    const PROJECT_DB_NAME='beadforge-local';
-    const PROJECT_DB_STORE='projects';
-    const PROJECT_RECORD_KEY='current';
-
-    class ProjectStorage {
-        static readLocal(){
-            const keys=[PROJECT_STORAGE_KEY,LEGACY_PROJECT_STORAGE_KEY];
-            for(let i=0;i<keys.length;i++){
-                try{
-                    const raw=localStorage.getItem(keys[i]);
-                    if(!raw)continue;
-                    const data=JSON.parse(raw);
-                    if(data&&typeof data==='object')return data;
-                }catch(e){}
-            }
-            return null;
-        }
-        static writeLocal(data){try{localStorage.setItem(PROJECT_STORAGE_KEY,JSON.stringify(data));return true;}catch(e){return false;}}
-        static openDb(){
-            if(typeof window==='undefined'||!window.indexedDB)return Promise.resolve(null);
-            if(this.dbPromise)return this.dbPromise;
-            this.dbPromise=new Promise((resolve,reject)=>{
-                let request;
-                try{request=window.indexedDB.open(PROJECT_DB_NAME,1);}catch(e){reject(e);return;}
-                request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains(PROJECT_DB_STORE))db.createObjectStore(PROJECT_DB_STORE);};
-                request.onsuccess=()=>resolve(request.result);
-                request.onerror=()=>reject(request.error||new Error('IndexedDB unavailable'));
-            });
-            return this.dbPromise;
-        }
-        static readIndexed(){
-            return this.openDb().then(db=>{
-                if(!db)return null;
-                return new Promise(resolve=>{
-                    let request;
-                    try{request=db.transaction(PROJECT_DB_STORE,'readonly').objectStore(PROJECT_DB_STORE).get(PROJECT_RECORD_KEY);}catch(e){resolve(null);return;}
-                    request.onsuccess=()=>resolve(request.result||null);
-                    request.onerror=()=>resolve(null);
-                });
-            }).catch(()=>null);
-        }
-        static writeIndexed(data){
-            return this.openDb().then(db=>{
-                if(!db)return false;
-                return new Promise(resolve=>{
-                    let tx;
-                    try{tx=db.transaction(PROJECT_DB_STORE,'readwrite');tx.objectStore(PROJECT_DB_STORE).put(data,PROJECT_RECORD_KEY);}catch(e){resolve(false);return;}
-                    tx.oncomplete=()=>resolve(true);
-                    tx.onerror=()=>resolve(false);
-                    tx.onabort=()=>resolve(false);
-                });
-            }).catch(()=>false);
-        }
-    }
-
     class PerlerApp {
         constructor(){
             this.width=29;this.height=29;this.grid=[];
             this.isDrawing=false;this.activeTool='draw';
-            this.hasUserEdited=false;
             this.currentColor=PERLER_COLORS.find(c=>c.id==='P18');
             this.history=new HistoryManager();
             this.beadMode=false;this.cellSize=20;
@@ -1440,43 +1379,10 @@
             this.centerCanvas();
             this.scheduleRender();
             this._autoSaveInterval=setInterval(()=>this.autoSave(),5*60*1000);
-            if(!this.loadAutoSave()){
-                this.loadStarterPattern();
-                this.restoreIndexedDb();
-            }
+            this.loadAutoSave();
         }
 
         initGrid(){this.grid=Array(this.height).fill(null).map(()=>Array(this.width).fill(null));}
-
-        loadStarterPattern(){
-            const grid=Array(this.height).fill(null).map(()=>Array(this.width).fill(null));
-            const size=Math.min(21,this.width,this.height),center=(size-1)/2,scale=size*0.47;
-            const offsetX=Math.floor((this.width-size)/2),offsetY=Math.floor((this.height-size)/2);
-            const inside=(x,y)=>{
-                const nx=(x-center)/scale,ny=(center-y)/scale;
-                return Math.pow(nx*nx+ny*ny-1,3)-nx*nx*Math.pow(ny,3)<=0;
-            };
-            for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-                if(!inside(x,y))continue;
-                let edge=false;
-                for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(!inside(x+dx,y+dy)){edge=true;break;}
-                let color=edge?'P18':(y<8?'P59':y<14?'P05':'P59');
-                if(!edge&&x>=6&&x<=8&&y>=4&&y<=7)color='P06';
-                if(!edge&&((x===14&&y===6)||(x===13&&y===7)))color='P04';
-                grid[offsetY+y][offsetX+x]=color;
-            }
-            this.grid=grid;
-            this.markGridDirty();
-            this.updateStats();
-        }
-
-        restoreIndexedDb(){
-            ProjectStorage.readIndexed().then(data=>{
-                const local=ProjectStorage.readLocal();
-                if(!data||this.hasUserEdited||(local&&this.validateSavedProject(local)))return;
-                if(this.restoreSavedProject(data,'indexeddb'))this.autoSave();
-            });
-        }
 
         markGridDirty(){this.gridDirty=true;this.scheduleRender();}
         markHoverDirty(){this.hoverDirty=true;this.scheduleRender();}
@@ -1754,12 +1660,11 @@
 
         setTool(t){
             this.activeTool=t;
-            if(t!=='pan')this.stopPan();
-            this.isDrawing=false;
-            this.canvasArea.classList.remove('drawing');
-            const toolButtons={draw:'toolDraw',erase:'toolErase',fill:'toolFill',picker:'toolPicker',pan:'toolPan'};
-            Object.entries(toolButtons).forEach(([name,id])=>{const btn=document.getElementById(id);if(btn){const active=t===name;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false');}});
-            this.canvasArea.classList.toggle('pan-tool',t==='pan');
+            document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+            document.getElementById('toolDraw').classList.toggle('active',t==='draw');
+            document.getElementById('toolErase').classList.toggle('active',t==='erase');
+            document.getElementById('toolFill').classList.toggle('active',t==='fill');
+            document.getElementById('toolPicker').classList.toggle('active',t==='picker');
         }
 
         applyTool(x,y,tool){
@@ -1798,7 +1703,7 @@
         zoomIn(){const r=this.canvasArea.getBoundingClientRect();this.zoomTo(this.zoom*1.25,r.width/2,r.height/2);}
         zoomOut(){const r=this.canvasArea.getBoundingClientRect();this.zoomTo(this.zoom/1.25,r.width/2,r.height/2);}
         zoomReset(){this.zoom=1;this.centerCanvas();}
-        startPan(cx,cy){this.isDrawing=false;this.canvasArea.classList.remove('drawing');this.isPanning=true;this.panStartX=cx;this.panStartY=cy;this.lastPanX=this.panX;this.lastPanY=this.panY;this.canvasArea.classList.add('panning');}
+        startPan(cx,cy){this.isPanning=true;this.panStartX=cx;this.panStartY=cy;this.lastPanX=this.panX;this.lastPanY=this.panY;this.canvasArea.classList.add('panning');}
         onPanMove(cx,cy){if(!this.isPanning)return;this.panX=this.lastPanX+(cx-this.panStartX);this.panY=this.lastPanY+(cy-this.panStartY);this.markGridDirty();this.markHoverDirty();}
         stopPan(){this.isPanning=false;this.canvasArea.classList.remove('panning');}
         toggleBeadMode(){this.beadMode=!this.beadMode;this.markGridDirty();this.showToast(this.beadMode?'已开启拼豆效果':'已关闭拼豆效果');}
@@ -1812,7 +1717,7 @@
         updatePerfWarning(){const el=document.getElementById('perfWarning');if(el)el.style.display=this.isLargeCanvas?'flex':'none';}
         renderSizePresets(){const container=document.getElementById('sizePresets');if(!container)return;container.innerHTML='';CANVAS_PRESETS.forEach(p=>{const btn=document.createElement('button');btn.className='btn btn-secondary size-preset-btn';btn.textContent=p.label;btn.title=p.desc;btn.onclick=()=>this.applyPreset(p.w,p.h);container.appendChild(btn);});}
         applyPreset(w,h){this.saveState();const ng=[];for(let y=0;y<h;y++){const row=[];for(let x=0;x<w;x++){if(y<this.height&&x<this.width)row.push(this.grid[y][x]);else row.push(null);}ng.push(row);}this.width=w;this.height=h;this.grid=ng;this.updateSizeInputs();this.markGridDirty();this.updateStats();this.centerCanvas();this.showToast(`已应用 ${w}×${h}`);}
-        saveState(markEdit=true){if(markEdit)this.hasUserEdited=true;this.history.push({width:this.width,height:this.height,grid:this.grid});}
+        saveState(){this.history.push({width:this.width,height:this.height,grid:this.grid});}
         undo(){if(!this.history.isEmpty()){const s=this.history.pop();this.width=s.width;this.height=s.height;this.grid=s.grid;this.updateSizeInputs();this.markGridDirty();this.updateStats();this.showToast('已撤销');}else this.showToast('无历史','warning');}
         clear(){this.saveState();this.initGrid();this.markGridDirty();this.updateStats();this.autoSave();this.showToast('已清空');}
 
@@ -2081,50 +1986,28 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             }
         }
 
-        saveProject(){
-            this.saveState();
-            const saved=this.autoSave();
-            const message=getXhsMiniTool()?'已保存到小红书本地，重新打开小工具会自动恢复':'已保存到本地，重新打开页面会自动恢复';
-            this.showToast(saved?message:'本地存档失败，请先导出 JSON 备份',saved?'success':'warning');
-        }
-
         autoSave(){
-            const data={version:'1.0',type:'beadforge_project',width:this.width,height:this.height,grid:this.grid,savedAt:Date.now()};
-            const localSaved=ProjectStorage.writeLocal(data);
-            ProjectStorage.writeIndexed(data);
-            return localSaved;
+            try{
+                const data={width:this.width,height:this.height,grid:this.grid,timestamp:Date.now()};
+                localStorage.setItem('perlercraft_autosave',JSON.stringify(data));
+            }catch(e){}
         }
 
         loadAutoSave(){
-            const data=ProjectStorage.readLocal();
-            return data?this.restoreSavedProject(data,'local'):false;
-        }
-
-        restoreSavedProject(data,source){
-            const saved=this.validateSavedProject(data);
-            if(!saved)return false;
-            this.saveState(false);
-            this.width=saved.width;this.height=saved.height;this.grid=saved.grid;
-            this.updateSizeInputs();this.markGridDirty();this.updateStats();
-            const t=saved.savedAt?new Date(saved.savedAt):null;
-            const time=t&&!isNaN(t.getTime())?` (${t.toLocaleTimeString()})`:'';
-            const message=source==='indexeddb'?'已从小红书本地存档恢复':'已恢复上次存档';
-            this.showToast(message+time,'success');
-            return true;
-        }
-
-        validateSavedProject(data){
-            if(!data||typeof data!=='object'||!Array.isArray(data.grid))return null;
-            const w=parseInt(data.width,10),h=parseInt(data.height,10);
-            if(!w||!h||w<5||w>200||h<5||h>200||data.grid.length!==h)return null;
-            const valid=new Set(PERLER_COLORS.map(c=>c.id)),grid=[];
-            for(let y=0;y<h;y++){
-                const row=data.grid[y];if(!Array.isArray(row)||row.length!==w)return null;
-                const clean=[];
-                for(let x=0;x<w;x++)clean.push(typeof row[x]==='string'&&valid.has(row[x])?row[x]:null);
-                grid.push(clean);
-            }
-            return {width:w,height:h,grid:grid,savedAt:data.savedAt||data.timestamp||0};
+            try{
+                const raw=localStorage.getItem('perlercraft_autosave');
+                if(!raw)return false;
+                const data=JSON.parse(raw);
+                if(data.grid&&data.grid.length>0){
+                    this.saveState();
+                    this.width=data.width;this.height=data.height;this.grid=data.grid;
+                    this.updateSizeInputs();this.markGridDirty();this.updateStats();
+                    const t=new Date(data.timestamp);
+                    this.showToast(`已恢复自动保存 (${t.toLocaleTimeString()})`,'success');
+                    return true;
+                }
+            }catch(e){}
+            return false;
         }
 
         exportCSV(){
@@ -2235,16 +2118,13 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
         bindEvents(){
             document.addEventListener('mouseup',()=>{this.isDrawing=false;this.stopPan();this.canvasArea.classList.remove('drawing');});
             document.addEventListener('contextmenu',e=>e.preventDefault());
-            document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')this.autoSave();});
-            window.addEventListener('pagehide',()=>this.autoSave());
 
             document.addEventListener('keydown',e=>{
                 if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();this.undo();}
-                if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();this.saveProject();}
+                if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();this.saveState();this.autoSave();this.showToast('已保存','success');}
                 if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
                 if(e.key.toLowerCase()==='b')this.setTool('draw');if(e.key.toLowerCase()==='e')this.setTool('erase');
                 if(e.key.toLowerCase()==='f')this.setTool('fill');if(e.key.toLowerCase()==='i')this.setTool('picker');
-                if(e.key.toLowerCase()==='h')this.setTool('pan');
                 if(e.key==='+'||e.key==='=')this.zoomIn();if(e.key==='-')this.zoomOut();if(e.key==='0')this.zoomReset();
                 if(e.key===' '){e.preventDefault();this.zoomReset();}
             });
@@ -2287,13 +2167,6 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
                 this.activePointers[e.pointerId]={x:e.clientX,y:e.clientY};
                 if(this.canvas.setPointerCapture){try{this.canvas.setPointerCapture(e.pointerId);}catch(err){}}
                 if(pointerPoints().length>=2){beginPinch();return;}
-                if(this.activeTool==='pan'){
-                    this.pointerMode='pan';
-                    this.hoverCell=null;
-                    this.markHoverDirty();
-                    this.startPan(e.clientX,e.clientY);
-                    return;
-                }
                 const{x,y}=this.screenToGrid(e.clientX,e.clientY);
                 if(e.button===1||(e.button===0&&e.altKey)){this.pointerMode='pan';this.startPan(e.clientX,e.clientY);return;}
                 if(e.button===2){this.pointerMode='draw';this.saveState();this.isDrawing=true;this.applyTool(x,y,this.activeTool==='draw'?'erase':'draw');return;}
@@ -2308,13 +2181,6 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
                 if(!pointer)return;
                 pointer.x=e.clientX;pointer.y=e.clientY;
                 if(pointerPoints().length>=2){e.preventDefault();updatePinch();this.hoverCell=null;this.markHoverDirty();return;}
-                if(this.pointerMode==='pan'&&this.isPanning){
-                    e.preventDefault();
-                    this.onPanMove(e.clientX,e.clientY);
-                    this.hoverCell=null;
-                    this.markHoverDirty();
-                    return;
-                }
                 const{x,y}=this.screenToGrid(e.clientX,e.clientY);
                 this.hoverCell={hx:x,hy:y};this.markHoverDirty();
                 if(this.pointerMode==='draw'&&this.isDrawing&&!this.isPanning){
@@ -2343,33 +2209,28 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             }else{
                 this.canvas.addEventListener('mousedown',e=>{
                     e.preventDefault();const{x,y}=this.screenToGrid(e.clientX,e.clientY);
-                    if(this.activeTool==='pan'){this.pointerMode='pan';this.hoverCell=null;this.markHoverDirty();this.startPan(e.clientX,e.clientY);return;}
                     if(e.button===1||(e.button===0&&e.altKey)){this.startPan(e.clientX,e.clientY);return;}
                     if(e.button===2){this.saveState();this.isDrawing=true;this.applyTool(x,y,this.activeTool==='draw'?'erase':'draw');return;}
                     this.saveState();this.isDrawing=true;this.canvasArea.classList.add('drawing');this.applyTool(x,y,this.activeTool);
                 });
                 this.canvas.addEventListener('mousemove',e=>{
-                    if(this.isPanning){this.onPanMove(e.clientX,e.clientY);this.hoverCell=null;this.markHoverDirty();return;}
                     const{x,y}=this.screenToGrid(e.clientX,e.clientY);this.hoverCell={hx:x,hy:y};this.markHoverDirty();
-                    if(this.isDrawing){if(e.buttons===2)this.applyTool(x,y,this.activeTool==='draw'?'erase':'draw');else this.applyTool(x,y,this.activeTool);}
+                    if(this.isDrawing&&!this.isPanning){if(e.buttons===2)this.applyTool(x,y,this.activeTool==='draw'?'erase':'draw');else this.applyTool(x,y,this.activeTool);}
+                    if(this.isPanning)this.onPanMove(e.clientX,e.clientY);
                 });
                 this.canvas.addEventListener('touchstart',e=>{
                     if(e.touches.length!==1)return;
                     e.preventDefault();
-                    const touch=e.touches[0];
-                    if(this.activeTool==='pan'){this.pointerMode='pan';this.hoverCell=null;this.markHoverDirty();this.startPan(touch.clientX,touch.clientY);return;}
-                    const{x,y}=this.screenToGrid(touch.clientX,touch.clientY);
+                    const touch=e.touches[0];const{x,y}=this.screenToGrid(touch.clientX,touch.clientY);
                     this.saveState();this.isDrawing=true;this.canvasArea.classList.add('drawing');this.applyTool(x,y,this.activeTool);
                 },{passive:false});
                 this.canvas.addEventListener('touchmove',e=>{
                     if(e.touches.length!==1)return;
                     e.preventDefault();
-                    const touch=e.touches[0];
-                    if(this.isPanning){this.onPanMove(touch.clientX,touch.clientY);return;}
-                    const{x,y}=this.screenToGrid(touch.clientX,touch.clientY);
+                    const touch=e.touches[0];const{x,y}=this.screenToGrid(touch.clientX,touch.clientY);
                     if(this.isDrawing)this.applyTool(x,y,this.activeTool);
                 },{passive:false});
-                this.canvas.addEventListener('touchend',e=>{e.preventDefault();this.isDrawing=false;this.pointerMode=null;this.stopPan();this.canvasArea.classList.remove('drawing');},{passive:false});
+                this.canvas.addEventListener('touchend',e=>{e.preventDefault();this.isDrawing=false;this.canvasArea.classList.remove('drawing');},{passive:false});
             }
 
             this.canvas.addEventListener('mouseleave',()=>{this.hoverCell=null;this.markHoverDirty();});
@@ -2379,9 +2240,8 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             document.getElementById('toolErase').onclick=()=>this.setTool('erase');
             document.getElementById('toolFill').onclick=()=>this.setTool('fill');
             document.getElementById('toolPicker').onclick=()=>this.setTool('picker');
-            document.getElementById('toolPan').onclick=()=>this.setTool('pan');
             document.getElementById('undoBtn').onclick=()=>this.undo();
-            document.getElementById('saveBtn').onclick=()=>this.saveProject();
+            document.getElementById('saveBtn').onclick=()=>{this.saveState();this.autoSave();this.showToast('已保存','success');};
             document.getElementById('clearBtn').onclick=()=>{if(confirm('清空画布？'))this.clear();};
             document.getElementById('rotateLeftBtn').onclick=()=>this.rotate('left');
             document.getElementById('rotateRightBtn').onclick=()=>this.rotate('right');
