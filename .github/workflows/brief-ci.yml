@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Check manual LLM grid size limits
+        run: node scripts/test-llm-grid-size.cjs
+
       - name: Check embedded JavaScript syntax
         run: |
           node --input-type=module <<'NODE'

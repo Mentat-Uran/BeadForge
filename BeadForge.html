@@ -2408,7 +2408,7 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             ['tplWidth','tplHeight','tplMaxColors'].forEach(id=>{document.getElementById(id).oninput=()=>this.updatePromptPreview();});
             document.getElementById('llmPrompt').oninput=()=>this.updatePromptPreview();
             document.getElementById('llmSubmitBtn').onclick=()=>{const p=document.getElementById('llmPrompt').value;if(!p){this.showToast('请输入描述','warning');return;}this.closeModal('llmModal');const g=this.mockPattern(p);this.saveState();this.grid=g;const h=g.length,w=g[0]?g[0].length:this.width;if(h!==this.height||w!==this.width){this.height=h;this.width=w;this.updateSizeInputs();}this.markGridDirty();this.updateStats();this.showToast('已生成示例图案，可在任何LLM工具中使用预览中的提示词生成JSON','info');};
-            document.getElementById('llmManualBtn').onclick=()=>{const raw=document.getElementById('llmManualInput').value.trim();if(!raw){this.showToast('请粘贴LLM生成的内容','warning');return;}try{const g=this.parseLLMOutput(raw);this.saveState();this.grid=g;const h=g.length,w=g[0]?g[0].length:this.width;if(h!==this.height||w!==this.width){this.height=h;this.width=w;this.updateSizeInputs();}this.markGridDirty();this.updateStats();this.closeModal('llmModal');this.showToast('导入成功','success');}catch(e){this.showToast('解析失败: '+e.message,'error');}};
+            document.getElementById('llmManualBtn').onclick=()=>{const raw=document.getElementById('llmManualInput').value.trim();if(!raw){this.showToast('请粘贴LLM生成的内容','warning');return;}try{const g=this.parseLLMOutput(raw);const {width:w,height:h}=validateLLMGridSize(g);this.saveState();this.grid=g;if(h!==this.height||w!==this.width){this.height=h;this.width=w;this.updateSizeInputs();}this.markGridDirty();this.updateStats();this.closeModal('llmModal');this.showToast('导入成功','success');}catch(e){this.showToast('解析失败: '+e.message,'error');}};
 
             document.getElementById('imageConvertBtn').onclick=()=>this.openModal('imageModal');
             const ua=document.getElementById('imageUploadArea');ua.addEventListener('dragover',e=>{e.preventDefault();ua.style.borderColor='var(--accent)';});ua.addEventListener('dragleave',()=>ua.style.borderColor='');ua.addEventListener('drop',e=>{e.preventDefault();ua.style.borderColor='';const f=e.dataTransfer.files[0];if(f)this.handleImageFile(f);});
@@ -2430,6 +2430,16 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
     }
 
     let app;
+    function validateLLMGridSize(grid) {
+        const height = Array.isArray(grid) ? grid.length : 0;
+        const firstRow = height > 0 && Array.isArray(grid[0]) ? grid[0] : null;
+        const width = firstRow ? firstRow.length : 0;
+        if (width < 5 || width > 200 || height < 5 || height > 200) {
+            throw new Error('LLM 网格尺寸必须为5-200');
+        }
+        return { width, height };
+    }
+
     function bindStaticActions(){
         const buttonLabels={importBtn:'导入图案',exportBtn:'导出 JSON',printExportBtn:'导出与打印'};
         Object.keys(buttonLabels).forEach(id=>{const button=document.getElementById(id);if(button)button.setAttribute('aria-label',buttonLabels[id]);});
