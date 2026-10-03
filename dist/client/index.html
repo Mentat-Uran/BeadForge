@@ -1338,6 +1338,31 @@
         static load(k){try{const v=localStorage.getItem('pc_'+k);return v?this._deobf(v):'';}catch(e){return'';}}
     }
 
+    function validateImportedGrid(grid) {
+        if (!Array.isArray(grid) || grid.length === 0) {
+            throw new Error('网格必须是非空二维数组');
+        }
+
+        const firstRow = grid[0];
+        if (!Array.isArray(firstRow) || firstRow.length === 0) {
+            throw new Error('网格行必须包含相同数量的颜色单元');
+        }
+        const width = firstRow.length;
+
+        for (const row of grid) {
+            if (!Array.isArray(row) || row.length !== width) {
+                throw new Error('网格每行必须包含相同数量的颜色单元');
+            }
+        }
+
+        const valid = new Set(PERLER_COLORS.map(color => color.id));
+        return grid.map(row => row.map(cell => {
+            if (cell === null || cell === undefined) return null;
+            if (typeof cell === 'string' && valid.has(cell)) return cell;
+            return null;
+        }));
+    }
+
     class PerlerApp {
         constructor(){
             this.width=29;this.height=29;this.grid=[];
@@ -1785,7 +1810,7 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             try{const lines=content.trim().split('\n').filter(l=>l.trim());const g=[];for(const l of lines){const cells=l.trim().split(/[\s,]+/).map(c=>{c=c.trim();if(c==='null'||c==='.'||c==='0'||c==='-'||c==='')return null;const m=c.match(/[PHAM]\d{2,3}/);return m?m[0]:null;});if(cells.length>0)g.push(cells);}if(g.length>0)return this.validateGrid(g);}catch(e){}
             throw new Error('无法解析LLM输出，请检查格式是否正确');}
 
-        validateGrid(grid){const valid=new Set(PERLER_COLORS.map(c=>c.id));return grid.map(row=>{if(!Array.isArray(row))return[null];return row.map(c=>{if(c===null||c===undefined)return null;if(typeof c==='string'&&valid.has(c))return c;return null;});});}
+        validateGrid(grid){ return validateImportedGrid(grid); }
 
         mockPattern(prompt){const ng=Array(this.height).fill(null).map(()=>Array(this.width).fill(null));const cs=['P18','P05','P03','P08','P07','P01'];let mc=cs[Math.floor(Math.random()*cs.length)];
             if(prompt.includes('猫')||prompt.includes('cat'))mc='P18';if(prompt.includes('花')||prompt.includes('flower'))mc='P05';if(prompt.includes('海'))mc='P08';if(prompt.includes('太阳'))mc='P03';

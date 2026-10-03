@@ -36,3 +36,6 @@ jobs:
           }
           new Function(blocks[0]);
           NODE
+
+      - name: Check imported grid shape in source and deployed HTML
+        run: node scripts/test-grid-import.cjs
