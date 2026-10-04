@@ -30,6 +30,27 @@ function loadGridSizeValidator(relativePath) {
   return validate;
 }
 
+function loadTemplateDimensionNormalizer(relativePath) {
+  const html = fs.readFileSync(path.join(repositoryRoot, relativePath), 'utf8');
+  const start = html.indexOf('    function normalizeLLMGridDimension(value, fallback) {');
+  assert.notEqual(start, -1, `${relativePath} must define the template dimension normalizer`);
+
+  const close = html.indexOf('\n    }', start);
+  assert.notEqual(close, -1, `${relativePath} must close the template dimension normalizer`);
+  const source = html.slice(start, close + '\n    }'.length).trim();
+  const normalize = vm.runInNewContext(`(${source})`);
+
+  assert.match(
+    html,
+    /const w=normalizeLLMGridDimension\(document\.getElementById\('tplWidth'\)\.value,this\.width\);const h=normalizeLLMGridDimension\(document\.getElementById\('tplHeight'\)\.value,this\.height\)/,
+    `${relativePath} must use bounded dimensions when building the prompt`,
+  );
+  assert.match(html, /id="tplWidth"[^>]*min="5"[^>]*max="200"/);
+  assert.match(html, /id="tplHeight"[^>]*min="5"[^>]*max="200"/);
+
+  return normalize;
+}
+
 function makeGrid(width, height) {
   return Array.from({ length: height }, () => Array(width).fill(null));
 }
@@ -51,5 +72,21 @@ for (const file of htmlFiles) {
     assert.throws(() => validate(makeGrid(5, 4)), /5-200/);
     assert.throws(() => validate(makeGrid(5, 201)), /5-200/);
     assert.throws(() => validate(null), /5-200/);
+
+    const ragged = makeGrid(5, 5);
+    ragged[1] = Array(201).fill(null);
+    assert.throws(() => validate(ragged), /相同宽度/);
+
+    const missingRow = makeGrid(5, 5);
+    missingRow[1] = null;
+    assert.throws(() => validate(missingRow), /相同宽度/);
+  });
+
+  test(`${file} constrains template prompt dimensions to 5–200`, () => {
+    const normalize = loadTemplateDimensionNormalizer(file);
+    assert.equal(normalize('4', 29), 5);
+    assert.equal(normalize('201', 29), 200);
+    assert.equal(normalize('', 29), 29);
+    assert.equal(normalize('32', 29), 32);
   });
 }
