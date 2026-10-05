@@ -1806,7 +1806,8 @@ const canvas=document.getElementById('importPreviewCanvas');const ctx=canvas.get
             return nearest;}
 
         parseLLMOutput(content){let s=content;const cb=content.match(/```(?:json)?\s*([\s\S]*?)```/);if(cb)s=cb[1].trim();const jm=s.match(/\{[\s\S]*\}/);if(jm)s=jm[0];
-            try{const p=JSON.parse(s);if(p.grid)return this.validateGrid(p.grid);if(Array.isArray(p))return this.validateGrid(p);}catch(e){}
+            let p;try{p=JSON.parse(s);}catch(e){}
+            if(p&&p.grid)return this.validateGrid(p.grid);if(Array.isArray(p))return this.validateGrid(p);
             try{const lines=content.trim().split('\n').filter(l=>l.trim());const g=[];for(const l of lines){const cells=l.trim().split(/[\s,]+/).map(c=>{c=c.trim();if(c==='null'||c==='.'||c==='0'||c==='-'||c==='')return null;const m=c.match(/[PHAM]\d{2,3}/);return m?m[0]:null;});if(cells.length>0)g.push(cells);}if(g.length>0)return this.validateGrid(g);}catch(e){}
             throw new Error('无法解析LLM输出，请检查格式是否正确');}
 

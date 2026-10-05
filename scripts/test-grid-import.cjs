@@ -11,19 +11,31 @@ const htmlFiles = [
 ];
 const colors = [{ id: 'P01' }, { id: 'P18' }];
 
-function loadGridValidator(relativePath) {
+function loadGridApp(relativePath) {
   const html = fs.readFileSync(path.join(repositoryRoot, relativePath), 'utf8');
-  const start = html.indexOf('    function validateImportedGrid(grid) {');
-  assert.notEqual(start, -1, `${relativePath} must define the import validator`);
+  const helperStart = html.indexOf('    function validateImportedGrid(grid) {');
+  const parseStart = html.indexOf('        parseLLMOutput(content){');
+  const validateStart = html.indexOf('\n        validateGrid(grid){', parseStart);
+  const mockStart = html.indexOf('\n        mockPattern(', validateStart);
+  assert.notEqual(helperStart, -1, `${relativePath} must define the import validator`);
+  assert.notEqual(parseStart, -1, `${relativePath} must define the LLM output parser`);
+  assert.notEqual(validateStart, -1, `${relativePath} must define the grid validator method`);
+  assert.notEqual(mockStart, -1, `${relativePath} must close the grid validator method`);
 
-  const close = html.indexOf('\n    }', start);
-  assert.notEqual(close, -1, `${relativePath} must close the import validator`);
-  const source = html.slice(start, close + '\n    }'.length).trim();
-  return vm.runInNewContext(`(${source})`, { PERLER_COLORS: colors });
+  const helperClose = html.indexOf('\n    }', helperStart);
+  assert.notEqual(helperClose, -1, `${relativePath} must close the import validator`);
+  const helperSource = html.slice(helperStart, helperClose + '\n    }'.length).trim();
+  const parseSource = html.slice(parseStart, validateStart).trim();
+  const validateSource = html.slice(validateStart + 1, mockStart).trim();
+  return vm.runInNewContext(
+    `${helperSource}\n({ ${parseSource}, ${validateSource} })`,
+    { PERLER_COLORS: colors },
+  );
 }
 
 for (const file of htmlFiles) {
-  const validate = loadGridValidator(file);
+  const app = loadGridApp(file);
+  const validate = app.validateGrid.bind(app);
 
   assert.equal(
     JSON.stringify(validate([['P01', null], ['P18', 'unknown']])),
@@ -45,6 +57,21 @@ for (const file of htmlFiles) {
     /非空二维数组/,
     `${file} should reject empty grids`,
   );
+  assert.throws(
+    () => app.parseLLMOutput('[["P01"],["P18","P01"]]'),
+    /相同数量/,
+    `${file} should not flatten malformed single-line JSON into one row`,
+  );
+  assert.equal(
+    JSON.stringify(app.parseLLMOutput('[["P01","P18"],["P18","P01"]]')),
+    JSON.stringify([['P01', 'P18'], ['P18', 'P01']]),
+    `${file} should preserve valid single-line JSON grids`,
+  );
+  assert.equal(
+    JSON.stringify(app.parseLLMOutput('P01, P18\nP18, P01')),
+    JSON.stringify([['P01', 'P18'], ['P18', 'P01']]),
+    `${file} should continue accepting plain-text grids`,
+  );
 }
 
-console.log('Grid import validation passed for source and both deployed HTML copies.');
+console.log('Grid validation and LLM parsing passed for source and both deployed HTML copies.');
