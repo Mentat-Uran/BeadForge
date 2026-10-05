@@ -62,6 +62,13 @@ for (const file of htmlFiles) {
     /相同数量/,
     `${file} should not flatten malformed single-line JSON into one row`,
   );
+  for (const invalidJson of ['{"grid":null}', '{"grid":false}']) {
+    assert.throws(
+      () => app.parseLLMOutput(invalidJson),
+      /非空二维数组/,
+      `${file} should reject a present but invalid grid value`,
+    );
+  }
   assert.equal(
     JSON.stringify(app.parseLLMOutput('[["P01","P18"],["P18","P01"]]')),
     JSON.stringify([['P01', 'P18'], ['P18', 'P01']]),
